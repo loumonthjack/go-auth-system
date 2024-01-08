@@ -1,5 +1,4 @@
 # Go SAML/OIDC Auth Service
-[![Coverage Status](https://coveralls.io/repos/github/loumonthjack/go-auth-system/badge.svg?branch=main)](https://coveralls.io/github/loumonthjack/go-auth-system?branch=main)
 [![Go Report Card](https://goreportcard.com/badge/github.com/loumonthjack/go-auth-system)](https://goreportcard.com/report/github.com/loumonthjack/go-auth-system)
 
 ## Description
