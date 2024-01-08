@@ -9,6 +9,7 @@ To install the project, you need to have Go installed on your machine. Then run 
 
 ```sh
 go mod download
+```
 
 ## Usage
 To run the project, run the following command:
