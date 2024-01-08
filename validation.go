@@ -1,8 +1,8 @@
-package golangauthsample
+package main
 
 import (
-	"strings"
 	"errors"
+	"strings"
 
 	"github.com/asaskevich/govalidator"
 )
@@ -30,11 +30,10 @@ func isValidConfirmPassword(password string, confirmPassword string) bool {
 	return password == confirmPassword
 }
 
-
 type RegisterRequest struct {
-	Email            string `json:"email"`
-	Password         string `json:"password"`
-	ConfirmPassword  string `json:"confirmPassword"`
+	Email           string `json:"email"`
+	Password        string `json:"password"`
+	ConfirmPassword string `json:"confirmPassword"`
 }
 
 func sanatizeRegisterRequest(newUser *RegisterRequest) {
@@ -78,6 +77,7 @@ func (u *RegisterRequest) Validate() error {
 
 	return nil
 }
+
 type ForgotPasswordRequest struct {
 	Email string `json:"email"`
 }

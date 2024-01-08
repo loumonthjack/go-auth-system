@@ -1,48 +1,69 @@
-package golangauthsample
+package main
 
 import (
+	"context"
+	"log"
+	"os"
+	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gin-gonic/gin"
 )
 
-type Route struct {
-	Path string
-	Handler gin.HandlerFunc
-	Method string
-}
 
-var protectedRoutes = []Route{
-	{Path: "/auth/logout", Handler: logout, Method: "POST"},
-	{Path: "/auth/change-password", Handler: showChangePasswordPage, Method: "GET"},
-	{Path: "/auth/change-password", Handler: changePassword, Method: "POST"},
-	{Path: "/auth/change-email", Handler: showChangeEmailPage, Method: "GET"},
-	{Path: "/auth/change-email", Handler: changeEmail, Method: "POST"},
-}
-
-var unprotectedRoutes = []Route{
-	{Path: "/", Handler: showIndexPage, Method: "GET"},
-	{Path: "/auth/login", Handler: showLoginPage, Method: "GET"},
-	{Path: "/auth/login", Handler: performLogin, Method: "POST"},
-	{Path: "/auth/register", Handler: showRegistrationPage, Method: "GET"},
-	{Path: "/auth/register", Handler: register, Method: "POST"},
-	{Path: "/auth/forgot-password", Handler: showForgotPasswordPage, Method: "GET"},
-	{Path: "/auth/forgot-password", Handler: forgotPassword, Method: "POST"},
-	{Path: "/auth/reset-password", Handler: showResetPasswordPage, Method: "GET"},
-	{Path: "/auth/reset-password", Handler: resetPassword, Method: "POST"},
-	{Path: "/auth/confirm-email", Handler: showConfirmEmailPage, Method: "GET"},
-	{Path: "/auth/confirm-email", Handler: confirmEmail, Method: "POST"},
-	{Path: "/auth/resend-confirmation-email", Handler: showResendConfirmationEmailPage, Method: "GET"},
-	{Path: "/auth/resend-confirmation-email", Handler: resendConfirmationEmail, Method: "POST"},
-}
-
-func (p Route) Register(router *gin.Engine) {
-	router.Handle(p.Method, p.Path, p.Handler)
-}
 
 func initializeRoutes(router *gin.Engine) {
-	for _, route := range protectedRoutes {
-		route.Register(router)
+	// Handle the index route
+	router.GET("/", showIndexPage)
+	ctx := context.Background()
+	
+    oidcConfig := OIDCConfig{
+        ClientID:     os.Getenv("OIDC_CLIENT_ID"),
+        ClientSecret: os.Getenv("OIDC_CLIENT_SECRET"),
+        RedirectURL:  os.Getenv("SERVER_URL") + "/callback",
+        ProviderURL:  os.Getenv("OIDC_PROVIDER_URL"),
+        Scopes:       []string{"profile", "email"},
+    }
+
+    provider, oauth2Config, err := initOIDCProvider(ctx, oidcConfig)
+    if err != nil {
+        log.Fatalf("Failed to initialize OIDC provider: %v", err)
+    }
+
+    verifier := provider.Verifier(&oidc.Config{ClientID: oidcConfig.ClientID})
+
+	// Group auth related routes together
+	authRoutes := router.Group("/auth")
+	{
+
+		authRoutes.GET("/login", ensureNotLoggedIn(), showLoginPage)
+		authRoutes.POST("/login", ensureNotLoggedIn(), performLogin)
+		authRoutes.GET("/logout", ensureLoggedIn(), logout)
+		authRoutes.POST("/logout", ensureLoggedIn(), logout)
+		
+		authRoutes.GET("/oidc", startOIDCFlow(oauth2Config))
+		authRoutes.GET("/callback", oidcCallback(oauth2Config, verifier))
+
+		authRoutes.GET("/register", ensureNotLoggedIn(), showRegistrationPage)
+		authRoutes.POST("/register", ensureNotLoggedIn(), register)
+
+		authRoutes.GET("/forgot-password", ensureNotLoggedIn(), showForgotPasswordPage)
+		authRoutes.POST("/forgot-password", ensureNotLoggedIn(), forgotPassword)
+
+		authRoutes.GET("/reset-password", ensureNotLoggedIn(), showResetPasswordPage)
+		authRoutes.POST("/reset-password", ensureNotLoggedIn(), resetPassword)
+
+		authRoutes.GET("/confirm-email", ensureNotLoggedIn(), showConfirmEmailPage)
+		authRoutes.POST("/confirm-email", ensureNotLoggedIn(), confirmEmail)
+
+		authRoutes.GET("/resend-confirmation-email", ensureNotLoggedIn(), showResendConfirmationEmailPage)
+		authRoutes.POST("/resend-confirmation-email", ensureNotLoggedIn(), resendConfirmationEmail)
+
+		authRoutes.GET("/change-password", ensureLoggedIn(), showChangePasswordPage)
+		authRoutes.POST("/change-password", ensureLoggedIn(), changePassword)
+
+		authRoutes.GET("/change-email", ensureLoggedIn(), showChangeEmailPage)
+		authRoutes.POST("/change-email", ensureLoggedIn(), changeEmail)
+
+
 	}
-	for _, route := range unprotectedRoutes {
-		route.Register(router)
-	}
+
 }

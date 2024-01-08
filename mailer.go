@@ -1,4 +1,4 @@
-package golangauthsample
+package main
 
 import (
 	"fmt"

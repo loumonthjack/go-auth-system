@@ -1,4 +1,4 @@
-package golangauthsample
+package main
 
 import (
 	"gorm.io/driver/postgres"
@@ -79,7 +79,7 @@ func findUserByEmail(email string) (User, error) {
 	if err := db.Where("email = ?", email).First(&user).Error; err != nil {
 		return User{}, err
 	}
-	
+
 	return user, nil
 }
 
