@@ -144,16 +144,15 @@ func updateEmail(user User, email string) error {
 }
 
 func getUserFromSession(db *gorm.DB, sessionToken string) (User, error) {
-    var session Session
-    if err := db.Where("token = ?", sessionToken).First(&session).Error; err != nil {
-        return User{}, err
-    }
+	var session Session
+	if err := db.Where("token = ?", sessionToken).First(&session).Error; err != nil {
+		return User{}, err
+	}
 
-    var user User
-    if err := db.Where("id = ?", session.UserID).First(&user).Error; err != nil {
-        return User{}, err
-    }
+	var user User
+	if err := db.Where("id = ?", session.UserID).First(&user).Error; err != nil {
+		return User{}, err
+	}
 
-    return user, nil
+	return user, nil
 }
-

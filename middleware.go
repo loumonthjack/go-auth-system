@@ -10,33 +10,32 @@ func sessionExists(c *gin.Context) bool {
 }
 
 func getSessionToken(c *gin.Context) (string, error) {
-    environment := getCurrentEnvironment()
-    return c.Cookie("session_token_" + environment)
+	environment := getCurrentEnvironment()
+	return c.Cookie("session_token_" + environment)
 }
 
 func getCurrentEnvironment() string {
-    if gin.Mode() == gin.ReleaseMode {
-        return "production"
-    }
-    return "development"
+	if gin.Mode() == gin.ReleaseMode {
+		return "production"
+	}
+	return "development"
 }
 
 func findUserBySession(c *gin.Context) (User, error) {
-    db := getDBInstance()
+	db := getDBInstance()
 
-    sessionToken, err := getSessionToken(c)
-    if err != nil {
-        return User{}, err
-    }
+	sessionToken, err := getSessionToken(c)
+	if err != nil {
+		return User{}, err
+	}
 
-    user, err := getUserFromSession(db, sessionToken)
-    if err != nil {
-        return User{}, err
-    }
+	user, err := getUserFromSession(db, sessionToken)
+	if err != nil {
+		return User{}, err
+	}
 
-    return user, nil
+	return user, nil
 }
-
 
 func ensureNotLoggedIn() gin.HandlerFunc {
 	return func(c *gin.Context) {
