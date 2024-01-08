@@ -46,7 +46,7 @@ func show404Page(c *gin.Context) {
 	http.ServeFile(c.Writer, c.Request, "templates/404.html")
 }
 
-func performLogin(c *gin.Context) {
+func login(c *gin.Context) {
 	var request LoginRequest
 	if err := c.ShouldBindJSON(&request); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
@@ -54,6 +54,7 @@ func performLogin(c *gin.Context) {
 	}
 
 	sanatizeLoginRequest(&request)
+	request.Validate()
 
 	user, err := findUserByEmail(request.Email)
 	if err != nil {
@@ -101,6 +102,7 @@ func register(c *gin.Context) {
 	}
 
 	sanatizeRegisterRequest(&request)
+	request.Validate()
 
 	if !isValidEmail(request.Email) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email"})
@@ -141,6 +143,7 @@ func forgotPassword(c *gin.Context) {
 	}
 
 	sanatizeForgotPasswordRequest(&request)
+	request.Validate()
 
 	if !isValidEmail(request.Email) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email"})
@@ -169,6 +172,7 @@ func resetPassword(c *gin.Context) {
 	}
 
 	sanatizeResetPasswordRequest(&request)
+	request.Validate()
 
 	if !isValidPassword(request.Password) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid password"})
@@ -202,6 +206,7 @@ func confirmEmail(c *gin.Context) {
 	}
 
 	sanatizeConfirmEmailRequest(&request)
+	request.Validate()
 
 	user, err := findUserByConfirmEmailToken(request.Token)
 	if err != nil {
@@ -225,6 +230,7 @@ func resendConfirmationEmail(c *gin.Context) {
 	}
 
 	sanatizeResendConfirmationEmailRequest(&request)
+	request.Validate()
 
 	if !isValidEmail(request.Email) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email"})
@@ -253,6 +259,7 @@ func changePassword(c *gin.Context) {
 	}
 
 	sanatizeChangePasswordRequest(&request)
+	request.Validate()
 
 	if !isValidPassword(request.Password) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid password"})
@@ -286,6 +293,7 @@ func changeEmail(c *gin.Context) {
 	}
 
 	sanatizeChangeEmailRequest(&request)
+	request.Validate()
 
 	if !isValidEmail(request.Email) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid email"})

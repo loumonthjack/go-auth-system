@@ -35,12 +35,12 @@ func initializeRoutes(router *gin.Engine) {
 	{
 
 		authRoutes.GET("/login", ensureNotLoggedIn(), showLoginPage)
-		authRoutes.POST("/login", ensureNotLoggedIn(), performLogin)
-		authRoutes.GET("/logout", ensureLoggedIn(), logout)
+		authRoutes.POST("/login", ensureNotLoggedIn(), login)
 		authRoutes.POST("/logout", ensureLoggedIn(), logout)
-		
+
 		authRoutes.GET("/oidc", startOIDCFlow(oauth2Config))
 		authRoutes.GET("/callback", oidcCallback(oauth2Config, verifier))
+		authRoutes.GET("/oidc-logout", oidcLogout(oauth2Config))
 
 		authRoutes.GET("/register", ensureNotLoggedIn(), showRegistrationPage)
 		authRoutes.POST("/register", ensureNotLoggedIn(), register)

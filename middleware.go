@@ -9,29 +9,34 @@ func sessionExists(c *gin.Context) bool {
 	return err == nil
 }
 
-func findUserBySession(c *gin.Context) (User, error) {
-	db := getDBInstance()
-	environment := "development"
-	if gin.Mode() == gin.ReleaseMode {
-		environment = "production"
-	}
-	sessionToken, err := c.Cookie("session_token_" + environment)
-	if err != nil {
-		return User{}, err
-	}
-
-	var session Session
-	if err := db.Where("token = ?", sessionToken).First(&session).Error; err != nil {
-		return User{}, err
-	}
-
-	var user User
-	if err := db.Where("id = ?", session.UserID).First(&user).Error; err != nil {
-		return User{}, err
-	}
-
-	return user, nil
+func getSessionToken(c *gin.Context) (string, error) {
+    environment := getCurrentEnvironment()
+    return c.Cookie("session_token_" + environment)
 }
+
+func getCurrentEnvironment() string {
+    if gin.Mode() == gin.ReleaseMode {
+        return "production"
+    }
+    return "development"
+}
+
+func findUserBySession(c *gin.Context) (User, error) {
+    db := getDBInstance()
+
+    sessionToken, err := getSessionToken(c)
+    if err != nil {
+        return User{}, err
+    }
+
+    user, err := getUserFromSession(db, sessionToken)
+    if err != nil {
+        return User{}, err
+    }
+
+    return user, nil
+}
+
 
 func ensureNotLoggedIn() gin.HandlerFunc {
 	return func(c *gin.Context) {

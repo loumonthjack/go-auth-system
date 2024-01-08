@@ -57,6 +57,21 @@ func sanatizeLoginRequest(loginRequest *LoginRequest) {
 func InvalidMessage(message string) error {
 	return errors.New(message)
 }
+func (u *LoginRequest) Validate() error {
+	if _, err := govalidator.ValidateStruct(u); err != nil {
+		return err
+	}
+
+	if !isValidEmail(u.Email) {
+		return InvalidMessage("Invalid Email")
+	}
+
+	if !isValidPassword(u.Password) {
+		return InvalidMessage("Invalid Password")
+	}
+
+	return nil
+}
 
 func (u *RegisterRequest) Validate() error {
 	if _, err := govalidator.ValidateStruct(u); err != nil {

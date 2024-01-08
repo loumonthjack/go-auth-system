@@ -70,5 +70,9 @@ func oidcCallback(oauth2Config *oauth2.Config, verifier *oidc.IDTokenVerifier) g
     }
 }
 
-
-
+func oidcLogout(oauth2Config *oauth2.Config) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		url := oauth2Config.AuthCodeURL("logout")
+		c.Redirect(http.StatusFound, url)
+	}
+}
