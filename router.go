@@ -30,6 +30,11 @@ func initializeRoutes(router *gin.Engine) {
 
     verifier := provider.Verifier(&oidc.Config{ClientID: oidcConfig.ClientID})
 
+	sp, err := initSAMLServiceProvider()
+	if err != nil {
+		log.Fatalf("Failed to initialize SAML service provider: %v", err)
+	}
+
 	// Group auth related routes together
 	authRoutes := router.Group("/auth")
 	{
@@ -42,6 +47,12 @@ func initializeRoutes(router *gin.Engine) {
 		authRoutes.GET("/callback", oidcCallback(oauth2Config, verifier))
 		authRoutes.GET("/oidc-logout", oidcLogout(oauth2Config))
 
+		authRoutes.GET("/saml/metadata", func(c *gin.Context) {
+			sp.ServeMetadata(c.Writer, c.Request)
+		})
+		authRoutes.POST("/saml/acs", func(c *gin.Context) {
+			sp.ServeACS(c.Writer, c.Request)
+		})
 		authRoutes.GET("/register", ensureNotLoggedIn(), showRegistrationPage)
 		authRoutes.POST("/register", ensureNotLoggedIn(), register)
 
