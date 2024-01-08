@@ -3,10 +3,13 @@ package main
 import (
 	"context"
 	"crypto"
+
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gin-gonic/gin"
-	"golang.org/x/oauth2"
+
 	"net/http"
+
+	"golang.org/x/oauth2"
 )
 
 type OIDCConfig struct {
