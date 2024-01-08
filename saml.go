@@ -4,16 +4,18 @@ import (
 	"crypto/rsa"
 	"crypto/tls"
 	"net/url"
+	"os"
+
 	"github.com/crewjam/saml/samlsp"
 )
 
 func initSAMLServiceProvider() (*samlsp.Middleware, error) {
-	keyPair, err := tls.LoadX509KeyPair("path/to/cert.pem", "path/to/key.pem")
+	keyPair, err := tls.LoadX509KeyPair("cert.pem", "key.pem")
 	if err != nil {
 		return nil, err
 	}
 
-	parsedURL, err := url.Parse("https://example.com/saml/acs")
+	parsedURL, err := url.Parse(os.Getenv("SERVER_URL"))
 	if err != nil {
 		return nil, err
 	}

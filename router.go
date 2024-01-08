@@ -4,31 +4,30 @@ import (
 	"context"
 	"log"
 	"os"
+
 	"github.com/coreos/go-oidc/v3/oidc"
 	"github.com/gin-gonic/gin"
 )
-
-
 
 func initializeRoutes(router *gin.Engine) {
 	// Handle the index route
 	router.GET("/", showIndexPage)
 	ctx := context.Background()
-	
-    oidcConfig := OIDCConfig{
-        ClientID:     os.Getenv("OIDC_CLIENT_ID"),
-        ClientSecret: os.Getenv("OIDC_CLIENT_SECRET"),
-        RedirectURL:  os.Getenv("SERVER_URL") + "/callback",
-        ProviderURL:  os.Getenv("OIDC_PROVIDER_URL"),
-        Scopes:       []string{"profile", "email"},
-    }
 
-    provider, oauth2Config, err := initOIDCProvider(ctx, oidcConfig)
-    if err != nil {
-        log.Fatalf("Failed to initialize OIDC provider: %v", err)
-    }
+	oidcConfig := OIDCConfig{
+		ClientID:     os.Getenv("OIDC_CLIENT_ID"),
+		ClientSecret: os.Getenv("OIDC_CLIENT_SECRET"),
+		RedirectURL:  os.Getenv("SERVER_URL") + "/callback",
+		ProviderURL:  os.Getenv("OIDC_PROVIDER_URL"),
+		Scopes:       []string{"profile", "email"},
+	}
 
-    verifier := provider.Verifier(&oidc.Config{ClientID: oidcConfig.ClientID})
+	provider, oauth2Config, err := initOIDCProvider(ctx, oidcConfig)
+	if err != nil {
+		log.Fatalf("Failed to initialize OIDC provider: %v", err)
+	}
+
+	verifier := provider.Verifier(&oidc.Config{ClientID: oidcConfig.ClientID})
 
 	sp, err := initSAMLServiceProvider()
 	if err != nil {
@@ -73,7 +72,6 @@ func initializeRoutes(router *gin.Engine) {
 
 		authRoutes.GET("/change-email", ensureLoggedIn(), showChangeEmailPage)
 		authRoutes.POST("/change-email", ensureLoggedIn(), changeEmail)
-
 
 	}
 
